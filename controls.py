@@ -1,7 +1,9 @@
 import pygame, sys
 from bullet import Bullet
 from ino import Ino
-def events(screen,gun, bullets):
+import time
+
+def events(screen, gun, bullets):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
@@ -20,6 +22,8 @@ def events(screen,gun, bullets):
                 gun.mright = False
             elif event.key == pygame.K_a:
                 gun.mleft = False
+
+
 def update(bg_color, screen, gun, inos, bullets):
     screen.fill(bg_color)
     for bullet in bullets.sprites():
@@ -28,16 +32,30 @@ def update(bg_color, screen, gun, inos, bullets):
     inos.draw(screen)
     pygame.display.flip()
 
-def update_bullet(bullets):
+
+def update_bullet(inos, bullets):
     bullets.update()
     for bullet in bullets.copy():
         if bullet.rect.bottom <= 0:
             bullets.remove(bullet)
 
+    collisions = pygame.sprite.groupcollide(bullets, inos, True, True)
+def gun_kill(stats,gun, screen, inos, bullets):
 
-def update_inos(inos):
+    stats.guns_left -= 1
+    inos.empty()
+    bullets.empty()
 
+    create_army(screen, inos)
+    gun.create_gun()
+    time.sleep(1)
+
+def update_inos(gun, inos, stats, screen, bullets):
     inos.update()
+
+    if pygame.sprite.spritecollideany(gun, inos):
+        gun_kill(stats, screen, inos, bullets, gun)
+
 
 def create_army(screen, inos):
     ino = Ino(screen)
@@ -54,4 +72,3 @@ def create_army(screen, inos):
             ino.rect.x = ino.x
             ino.rect.y = ino.rect.height + (ino.rect.height * row_number)
             inos.add(ino)
-
